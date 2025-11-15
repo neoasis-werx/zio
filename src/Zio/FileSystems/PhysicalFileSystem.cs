@@ -524,20 +524,15 @@ public class PhysicalFileSystem : FileSystem
         }
 
         var systemPath = ConvertPathToInternal(linkPath);
-        bool isDirectory;
-
-        if (File.Exists(systemPath))
+        bool isDirectory = false;
+        if (!File.Exists(systemPath))
         {
-            isDirectory = false;
-        }
-        else if (Directory.Exists(systemPath))
-        {
-            isDirectory = true;
-        }
-        else
-        {
-            resolvedPath = default;
-            return false;
+            isDirectory = Directory.Exists(systemPath);
+            if (!isDirectory)
+            {
+                resolvedPath = default;
+                return false;
+            }
         }
 
 #if NET7_0_OR_GREATER
