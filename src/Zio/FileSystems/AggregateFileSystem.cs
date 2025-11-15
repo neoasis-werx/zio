@@ -283,7 +283,14 @@ public class AggregateFileSystem : ReadOnlyFileSystem
     protected override (IFileSystem FileSystem, UPath Path) ResolvePathImpl(UPath path)
     {
         var fsPath = TryGetPath(path);
-        return !fsPath.HasValue ? (this, path) : (fsPath.Value.FileSystem, fsPath.Value.Path);
+        if (fsPath.HasValue)
+        {
+            return fsPath.Value.FileSystem.ResolvePath(fsPath.Value.Path);
+        }
+        else
+        {
+            return (this, path);
+        }
     }
     
     // ----------------------------------------------

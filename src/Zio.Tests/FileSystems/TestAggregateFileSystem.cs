@@ -205,8 +205,17 @@ public class TestAggregateFileSystem : TestFileSystemBase
     [Fact]
     public void TestResolvePath()
     {
+
         var fs = GetCommonAggregateFileSystem(out var fs1, out var fs2, out var fs3);
 
+        // Add a SubFileSystem (fs4) to test resolving paths inside a sub filesystem
+        var fs4Mem = new MemoryFileSystem();
+        fs4Mem.CreateDirectory("/test");
+        fs4Mem.WriteAllText("/test/hello.txt", "HelloText");
+        var fs4 = new SubFileSystem(fs4Mem, "/test");
+
+        fs.AddFileSystem(fs4);
+        
         // File (fs3)
         {
             var (resolvedFs, resolvedPath) = fs.ResolvePath("/A.txt");
@@ -226,6 +235,13 @@ public class TestAggregateFileSystem : TestFileSystemBase
             var (resolvedFs, resolvedPath) = fs.ResolvePath("/a/b");
             Assert.Equal(fs1, resolvedFs);
             Assert.Equal("/a/b", resolvedPath);
+        }
+
+        // File (fs4Mem) 
+        {
+            var (resolvedFs, resolvedPath) = fs.ResolvePath("/hello.txt");
+            Assert.Equal(fs4Mem, resolvedFs);
+            Assert.Equal("/test/hello.txt", resolvedPath);
         }
     }
 }
