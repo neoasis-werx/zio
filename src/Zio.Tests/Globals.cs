@@ -4,3 +4,5 @@ global using System.Linq;
 global using System.Threading;
 
 global using Xunit;
+
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
