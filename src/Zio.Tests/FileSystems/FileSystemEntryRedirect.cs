@@ -130,14 +130,14 @@ public class FileSystemEntryRedirect : FileSystem
         return _fs.TryResolveLinkTarget(linkPath, out resolvedPath);
     }
 
-    protected override IEnumerable<UPath> EnumeratePathsImpl(UPath path, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
+    protected override IEnumerable<UPath> EnumeratePathsImpl(UPath path, string searchPattern, EnumerationOptions enumerationOptions, SearchTarget searchTarget)
     {
-        return _fs.GetDirectoryEntry(path).EnumerateEntries(searchPattern, searchOption, searchTarget).Select(e => e.Path);
+        return _fs.GetDirectoryEntry(path).EnumerateEntries(searchPattern, enumerationOptions, searchTarget).Select(e => e.Path);
     }
     
-    protected override IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, SearchOption searchOption, SearchPredicate searchPredicate)
+    protected override IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, EnumerationOptions enumerationOptions, SearchPredicate searchPredicate)
     {
-        return _fs.GetDirectoryEntry(path).EnumerateItems(searchOption);
+        return _fs.GetDirectoryEntry(path).EnumerateItems(enumerationOptions);
     }
 
     protected override IFileSystemWatcher WatchImpl(UPath path)

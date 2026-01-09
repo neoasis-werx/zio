@@ -104,7 +104,11 @@ public class DirectoryEntry : FileSystemEntry
     /// <returns>An enumerable collection of <see cref="FileSystemEntry"/> that match a search pattern in a specified path.</returns>
     public IEnumerable<FileSystemEntry> EnumerateEntries(string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly, SearchTarget searchTarget = SearchTarget.Both)
     {
-        return FileSystem.EnumerateFileSystemEntries(Path, searchPattern, searchOption, searchTarget);
+        return FileSystem.EnumerateFileSystemEntries(Path, searchPattern, EnumerationOptionsUtils.FromSearchOption(searchOption), searchTarget);
+    }
+    public IEnumerable<FileSystemEntry> EnumerateEntries(string searchPattern = "*", EnumerationOptions enumerationOptions = null!, SearchTarget searchTarget = SearchTarget.Both)
+    {
+        return FileSystem.EnumerateFileSystemEntries(Path, searchPattern, enumerationOptions, searchTarget);
     }
 
     /// <summary>
@@ -115,7 +119,11 @@ public class DirectoryEntry : FileSystemEntry
     /// <returns>An enumerable collection of <see cref="FileSystemItem"/> in the directory specified by path and that match the specified search pattern, option and target.</returns>
     public IEnumerable<FileSystemItem> EnumerateItems(SearchOption searchOption = SearchOption.TopDirectoryOnly, SearchPredicate? searchPredicate = null)
     {
-        return FileSystem.EnumerateItems(Path, searchOption, searchPredicate);
+        return FileSystem.EnumerateItems(Path, EnumerationOptionsUtils.FromSearchOption(searchOption), searchPredicate);
+    }
+    public IEnumerable<FileSystemItem> EnumerateItems(EnumerationOptions? enumerationOptions = null!, SearchPredicate? searchPredicate = null)
+    {
+        return FileSystem.EnumerateItems(Path, EnumerationOptionsUtils.GetOrDefault(enumerationOptions) , searchPredicate);
     }
     
     /// <summary>Moves a <see cref="T:System.IO.DirectoryInfo" /> instance and its contents to a new path.</summary>

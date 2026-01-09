@@ -474,18 +474,18 @@ public class ZipArchiveFileSystem : FileSystem
     }
 
     /// <inheritdoc />
-    protected override IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, SearchOption searchOption, SearchPredicate? searchPredicate)
+    protected override IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, EnumerationOptions enumerationOptions, SearchPredicate? searchPredicate)
     {
-        return EnumeratePathsStr(path, "*", searchOption, SearchTarget.Both).Select(p => new FileSystemItem(this, p, p[p.Length - 1] == DirectorySeparator));
+        return EnumeratePathsStr(path, "*", enumerationOptions, SearchTarget.Both).Select(p => new FileSystemItem(this, p, p[p.Length - 1] == DirectorySeparator));
     }
 
     /// <inheritdoc />
-    protected override IEnumerable<UPath> EnumeratePathsImpl(UPath path, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
+    protected override IEnumerable<UPath> EnumeratePathsImpl(UPath path, string searchPattern, EnumerationOptions enumerationOptions, SearchTarget searchTarget)
     {
-        return EnumeratePathsStr(path, searchPattern, searchOption, searchTarget).Select(x => new UPath(x));
+        return EnumeratePathsStr(path, searchPattern, enumerationOptions, searchTarget).Select(x => new UPath(x));
     }
 
-    private IEnumerable<string> EnumeratePathsStr(UPath path, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
+    private IEnumerable<string> EnumeratePathsStr(UPath path, string searchPattern, EnumerationOptions enumerationOptions, SearchTarget searchTarget)
     {
         var search = SearchPattern.Parse(ref path, ref searchPattern);
 
@@ -497,7 +497,7 @@ public class ZipArchiveFileSystem : FileSystem
                 ? _entries
                 : GetEntriesInDirectory(path.FullName).Where(kv => kv.Key.FullName.Length > path.FullName.Length);
 
-            if (searchOption == SearchOption.TopDirectoryOnly)
+            if (!enumerationOptions.RecurseSubdirectories) // searchOption == SearchOption.TopDirectoryOnly
             {
                 internEntries = internEntries.Where(kv => kv.Key.IsInDirectory(path, false));
             }

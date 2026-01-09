@@ -771,7 +771,7 @@ public class MemoryFileSystem : FileSystem
     // ----------------------------------------------
 
     /// <inheritdoc />
-    protected override IEnumerable<UPath> EnumeratePathsImpl(UPath path, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
+    protected override IEnumerable<UPath> EnumeratePathsImpl(UPath path, string searchPattern, EnumerationOptions enumerationOptions, SearchTarget searchTarget)
     {
         var search = SearchPattern.Parse(ref path, ref searchPattern);
 
@@ -824,8 +824,8 @@ public class MemoryFileSystem : FileSystem
                         }
 
                         var isEntryMatching = search.Match(nodePair.Key);
-
-                        var canFollowFolder = searchOption == SearchOption.AllDirectories && nodePair.Value is DirectoryNode;
+                        
+                        var canFollowFolder = enumerationOptions.RecurseSubdirectories && nodePair.Value is DirectoryNode; //searchOption == SearchOption.AllDirectories && nodePair.Value is DirectoryNode;
 
                         var addEntry = (nodePair.Value is FileNode && searchTarget != SearchTarget.Directory && isEntryMatching)
                                        || (nodePair.Value is DirectoryNode && searchTarget != SearchTarget.File && isEntryMatching);
@@ -862,7 +862,7 @@ public class MemoryFileSystem : FileSystem
     }
 
     /// <inheritdoc />
-    protected override IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, SearchOption searchOption, SearchPredicate? searchPredicate)
+    protected override IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, EnumerationOptions enumerationOptions, SearchPredicate? searchPredicate)
     {
         var foldersToProcess = new List<UPath>();
         foldersToProcess.Add(path);
@@ -908,7 +908,8 @@ public class MemoryFileSystem : FileSystem
                     foreach (var nodePair in directory.Children)
                     {
                         var node = nodePair.Value;
-                        var canFollowFolder = searchOption == SearchOption.AllDirectories && nodePair.Value is DirectoryNode;
+                        
+                        var canFollowFolder = enumerationOptions.RecurseSubdirectories && nodePair.Value is DirectoryNode; // searchOption == SearchOption.AllDirectories && nodePair.Value is DirectoryNode
                         var fullPath = directoryPath / nodePair.Key;
 
                         if (canFollowFolder)

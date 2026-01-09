@@ -4,9 +4,7 @@
 
 using System.IO;
 using System.Text;
-
 using Zio.FileSystems;
-
 using static Zio.FileSystemExceptionHelper;
 
 namespace Zio;
@@ -28,6 +26,7 @@ public static class FileSystemExtensions
         {
             fs.CreateDirectory(subFolder);
         }
+
         return new SubFileSystem(fs, subFolder);
     }
 
@@ -330,6 +329,7 @@ public static class FileSystemExtensions
         {
             stream.CopyTo(memstream);
         }
+
         return memstream.ToArray();
     }
 
@@ -410,6 +410,7 @@ public static class FileSystemExtensions
                 {
                     lines.Add(line);
                 }
+
                 return lines.ToArray();
             }
         }
@@ -439,6 +440,7 @@ public static class FileSystemExtensions
                 {
                     lines.Add(line);
                 }
+
                 return lines.ToArray();
             }
         }
@@ -672,7 +674,7 @@ public static class FileSystemExtensions
     public static IEnumerable<UPath> EnumeratePaths(this IFileSystem fileSystem, UPath path, string searchPattern)
     {
         if (searchPattern is null) throw new ArgumentNullException(nameof(searchPattern));
-        return EnumeratePaths(fileSystem, path, searchPattern, SearchOption.TopDirectoryOnly);
+        return EnumeratePaths(fileSystem, path, searchPattern, EnumerationOptionsUtils.FromSearchOption(SearchOption.TopDirectoryOnly));
     }
 
     /// <summary>
@@ -689,7 +691,13 @@ public static class FileSystemExtensions
     public static IEnumerable<UPath> EnumeratePaths(this IFileSystem fileSystem, UPath path, string searchPattern, SearchOption searchOption)
     {
         if (searchPattern is null) throw new ArgumentNullException(nameof(searchPattern));
-        return fileSystem.EnumeratePaths(path, searchPattern, searchOption, SearchTarget.Both);
+        return fileSystem.EnumeratePaths(path, searchPattern, EnumerationOptionsUtils.FromSearchOption(searchOption));
+    }
+
+    public static IEnumerable<UPath> EnumeratePaths(this IFileSystem fileSystem, UPath path, string searchPattern, EnumerationOptions enumerationOptions)
+    {
+        if (searchPattern is null) throw new ArgumentNullException(nameof(searchPattern));
+        return fileSystem.EnumeratePaths(path, searchPattern, enumerationOptions, SearchTarget.Both);
     }
 
     /// <summary>
@@ -824,9 +832,21 @@ public static class FileSystemExtensions
         if (searchPattern is null) throw new ArgumentNullException(nameof(searchPattern));
         foreach (var subPath in fileSystem.EnumeratePaths(path, searchPattern, searchOption, searchTarget))
         {
-            yield return fileSystem.DirectoryExists(subPath) ? (FileSystemEntry) new DirectoryEntry(fileSystem, subPath) : new FileEntry(fileSystem, subPath);
+            yield return fileSystem.DirectoryExists(subPath) ? (FileSystemEntry)new DirectoryEntry(fileSystem, subPath) : new FileEntry(fileSystem, subPath);
         }
     }
+
+    public static IEnumerable<FileSystemEntry> EnumerateFileSystemEntries(this IFileSystem fileSystem, UPath path, string searchPattern, EnumerationOptions enumerationOptions,
+        SearchTarget searchTarget = SearchTarget.Both)
+    {
+        if (searchPattern is null) throw new ArgumentNullException(nameof(searchPattern));
+
+        foreach (var subPath in fileSystem.EnumeratePaths(path, searchPattern, enumerationOptions, searchTarget))
+        {
+            yield return fileSystem.DirectoryExists(subPath) ? (FileSystemEntry)new DirectoryEntry(fileSystem, subPath) : new FileEntry(fileSystem, subPath);
+        }
+    }
+
 
     /// <summary>
     /// Gets a <see cref="FileSystemEntry"/> for the specified path. If the file or directory does not exist, throws a <see cref="FileNotFoundException"/>
@@ -841,6 +861,7 @@ public static class FileSystemExtensions
         {
             return new FileEntry(fileSystem, path);
         }
+
         var directoryExists = fileSystem.DirectoryExists(path);
         if (directoryExists)
         {
@@ -863,6 +884,7 @@ public static class FileSystemExtensions
         {
             return new FileEntry(fileSystem, path);
         }
+
         var directoryExists = fileSystem.DirectoryExists(path);
         if (directoryExists)
         {
@@ -884,6 +906,7 @@ public static class FileSystemExtensions
         {
             throw NewFileNotFoundException(filePath);
         }
+
         return new FileEntry(fileSystem, filePath);
     }
 
@@ -899,6 +922,7 @@ public static class FileSystemExtensions
         {
             throw NewDirectoryNotFoundException(directoryPath);
         }
+
         return new DirectoryEntry(fileSystem, directoryPath);
     }
 

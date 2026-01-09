@@ -210,18 +210,18 @@ public abstract class ComposeFileSystem : FileSystem
     // ----------------------------------------------
 
     /// <inheritdoc />
-    protected override IEnumerable<UPath> EnumeratePathsImpl(UPath path, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
+    protected override IEnumerable<UPath> EnumeratePathsImpl(UPath path, string searchPattern, EnumerationOptions enumerationOptions, SearchTarget searchTarget)
     {
-        foreach (var subPath in FallbackSafe.EnumeratePaths(ConvertPathToDelegate(path), searchPattern, searchOption, searchTarget))
+        foreach (var subPath in FallbackSafe.EnumeratePaths(ConvertPathToDelegate(path), searchPattern, enumerationOptions, searchTarget))
         {
             yield return ConvertPathFromDelegate(subPath);
         }
     }
 
     /// <inheritdoc />
-    protected override IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, SearchOption searchOption, SearchPredicate? searchPredicate)
+    protected override IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, EnumerationOptions enumerationOptions, SearchPredicate? searchPredicate)
     {
-        foreach (var subItem in FallbackSafe.EnumerateItems(ConvertPathToDelegate(path), searchOption, searchPredicate))
+        foreach (var subItem in FallbackSafe.EnumerateItems(ConvertPathToDelegate(path), enumerationOptions, searchPredicate))
         {
             var localItem = subItem;
             localItem.Path = ConvertPathFromDelegate(localItem.Path);

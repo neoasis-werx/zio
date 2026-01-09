@@ -39,7 +39,7 @@ public interface IFileSystem : IDisposable
     /// Deletes the specified directory and, if indicated, any subdirectories and files in the directory.
     /// </summary>
     /// <param name="path">The path of the directory to remove.</param>
-    /// <param name="isRecursive"><c>true</c> to remove directories, subdirectories, and files in path; otherwise, <c>false</c>.</param>
+    /// <param name="isRecursive"><c>true</c> to remove directories, subdirectories, and files in the path; otherwise, <c>false</c>.</param>
     void DeleteDirectory(UPath path, bool isRecursive);
 
     // ----------------------------------------------
@@ -74,10 +74,10 @@ public interface IFileSystem : IDisposable
     /// Determines whether the specified file exists.
     /// </summary>
     /// <param name="path">The path.</param>
-    /// <returns><c>true</c> if the caller has the required permissions and path contains the name of an existing file;
-    /// otherwise, <c>false</c>. This method also returns false if path is null, an invalid path, or a zero-length string.
-    /// If the caller does not have sufficient permissions to read the specified file,
-    /// no exception is thrown and the method returns false regardless of the existence of path.</returns>
+    /// <returns><c>true</c> if the caller has the required permissions and the path contains the name of an existing file;
+    /// otherwise, <c>false</c>. This method also returns false if the path is null, an invalid path, or a zero-length string.
+    /// If the caller does not have enough permissions to read the specified file,
+    /// no exception is thrown and the method returns false regardless of the existence of the path.</returns>
     bool FileExists(UPath path);
 
     /// <summary>
@@ -132,7 +132,7 @@ public interface IFileSystem : IDisposable
     /// Sets the date and time the file was created.
     /// </summary>
     /// <param name="path">The path to a file or directory for which to set the creation date and time.</param>
-    /// <param name="time">A <see cref="DateTime"/> containing the value to set for the creation date and time of path. This value is expressed in local time.</param>
+    /// <param name="time">A <see cref="DateTime"/> containing the value to set for the creation date and time of the path. This value is expressed in local time.</param>
     void SetCreationTime(UPath path, DateTime time);
 
     /// <summary>
@@ -146,21 +146,21 @@ public interface IFileSystem : IDisposable
     /// Sets the date and time the file was last accessed.
     /// </summary>
     /// <param name="path">The path to a file or directory for which to set the last access date and time.</param>
-    /// <param name="time">A <see cref="DateTime"/> containing the value to set for the last access date and time of path. This value is expressed in local time.</param>
+    /// <param name="time">A <see cref="DateTime"/> containing the value to set for the last access date and time of the path. This value is expressed in local time.</param>
     void SetLastAccessTime(UPath path, DateTime time);
 
     /// <summary>
-    /// Returns the last write date and time of the specified file or directory.
+    /// Returns the last-write date and time of the specified file or directory.
     /// </summary>
     /// <param name="path">The path to a file or directory for which to obtain creation date and time information.</param>
-    /// <returns>A <see cref="DateTime"/> structure set to the last write date and time for the specified file or directory. This value is expressed in local time.</returns>
+    /// <returns>A <see cref="DateTime"/> structure set to the last-write date and time for the specified file or directory. This value is expressed in local time.</returns>
     DateTime GetLastWriteTime(UPath path);
 
     /// <summary>
     /// Sets the date and time that the specified file was last written to.
     /// </summary>
-    /// <param name="path">The path to a file or directory for which to set the last write date and time.</param>
-    /// <param name="time">A <see cref="DateTime"/> containing the value to set for the last write date and time of path. This value is expressed in local time.</param>
+    /// <param name="path">The path to a file or directory for which to set the last-write date and time.</param>
+    /// <param name="time">A <see cref="DateTime"/> containing the value to set for the last-write date and time of the path. This value is expressed in local time.</param>
     void SetLastWriteTime(UPath path, DateTime time);
 
     /// <summary>
@@ -182,10 +182,10 @@ public interface IFileSystem : IDisposable
     // ----------------------------------------------
 
     /// <summary>
-    /// Returns an enumerable collection of file names and/or directory names that match a search pattern in a specified path, and optionally searches subdirectories.
+    /// Returns an enumerable collection of file names and/or directory names that match a search pattern in a specified path and optionally searches subdirectories.
     /// </summary>
     /// <param name="path">The path to the directory to search.</param>
-    /// <param name="searchPattern">The search string to match against file-system entries in path. This parameter can contain a combination of valid literal path and wildcard (* and ?) characters (see Remarks), but doesn't support regular expressions.</param>
+    /// <param name="searchPattern">The search string to match against file-system entries in the path. This parameter can contain a combination of valid literal path and wildcard (* and ?) characters (see Remarks), but doesn't support regular expressions.</param>
     /// <param name="searchOption">One of the enumeration values that specifies whether the search operation should include only the current directory or should include all subdirectories.</param>
     /// <param name="searchTarget">The search target either <see cref="SearchTarget.Both"/> or only <see cref="SearchTarget.Directory"/> or <see cref="SearchTarget.File"/>.</param>
     /// <returns>An enumerable collection of file-system paths in the directory specified by path and that match the specified search pattern, option and target.</returns>
@@ -195,11 +195,31 @@ public interface IFileSystem : IDisposable
     /// Returns an enumerable collection of <see cref="FileSystemItem"/> that match a search pattern in a specified path, and optionally searches subdirectories.
     /// </summary>
     /// <param name="path">The path to the directory to search.</param>
-    /// <param name="searchPredicate">The search string to match against file-system entries in path. This parameter can contain a combination of valid literal path and wildcard (* and ?) characters (see Remarks), but doesn't support regular expressions.</param>
+    /// <param name="searchPredicate">The search string to match against file-system entries in the path. This parameter can contain a combination of valid literal path and wildcard (* and ?) characters (see Remarks), but doesn't support regular expressions.</param>
     /// <param name="searchOption">One of the enumeration values that specifies whether the search operation should include only the current directory or should include all subdirectories.</param>
     /// <returns>An enumerable collection of <see cref="FileSystemItem"/> in the directory specified by path and that match the specified search pattern, option and target.</returns>
     IEnumerable<FileSystemItem> EnumerateItems(UPath path, SearchOption searchOption, SearchPredicate? searchPredicate = null);
+    
+    /// <summary>
+    /// Returns an enumerable collection of file names and/or directory names that match a search pattern in a specified path and optionally searches subdirectories.
+    /// </summary>
+    /// <param name="path">The path to the directory to search.</param>
+    /// <param name="searchPattern">The search string to match against file-system entries in the path. This parameter can contain a combination of valid literal path and wildcard (* and ?) characters (see Remarks), but doesn't support regular expressions.</param>
+    /// <param name="enumerationOptions">An object that describes the search and enumeration configuration to use.</param>
+    /// <param name="searchTarget">The search target either <see cref="SearchTarget.Both"/> or only <see cref="SearchTarget.Directory"/> or <see cref="SearchTarget.File"/>.</param>
+    /// <returns>An enumerable collection of file-system paths in the directory specified by path and that match the specified search pattern, option and target.</returns>
+    IEnumerable<UPath> EnumeratePaths(UPath path, string searchPattern, EnumerationOptions enumerationOptions, SearchTarget searchTarget);
 
+    /// <summary>
+    /// Returns an enumerable collection of <see cref="FileSystemItem"/> that match a search pattern in a specified path, and optionally searches subdirectories.
+    /// </summary>
+    /// <param name="path">The path to the directory to search.</param>
+    /// <param name="searchPredicate">The search string to match against file-system entries in the path. This parameter can contain a combination of valid literal path and wildcard (* and ?) characters (see Remarks), but doesn't support regular expressions.</param>
+    /// <param name="enumerationOptions">An object that describes the search and enumeration configuration to use.</param>
+    /// <returns>An enumerable collection of <see cref="FileSystemItem"/> in the directory specified by path and that match the specified search pattern, option and target.</returns>
+    IEnumerable<FileSystemItem> EnumerateItems(UPath path, EnumerationOptions enumerationOptions, SearchPredicate? searchPredicate = null);
+    
+    
     // ----------------------------------------------
     // Watch API
     // ----------------------------------------------
@@ -208,7 +228,7 @@ public interface IFileSystem : IDisposable
     /// Checks if the file system and <paramref name="path"/> can be watched with <see cref="Watch"/>.
     /// </summary>
     /// <param name="path">The path to check.</param>
-    /// <returns>True if the the path can be watched on this file system.</returns>
+    /// <returns>True if the path can be watched on this file system.</returns>
     bool CanWatch(UPath path);
 
     /// <summary>
@@ -239,7 +259,7 @@ public interface IFileSystem : IDisposable
     UPath ConvertPathFromInternal(string systemPath);
 
     /// <summary>
-    /// Resolves the specified path to a path in the underlying file system, if one exists. For instance, a <see cref="Zio.FileSystems.SubFileSystem"/> would
+    /// Resolves the specified path to a path in the underlying file system if one exists. For instance, a <see cref="Zio.FileSystems.SubFileSystem"/> would
     /// resolve the path to a qualified path in the underlying file system.
     /// </summary>
     /// <param name="path">The path to resolve.</param>
@@ -251,7 +271,7 @@ public interface IFileSystem : IDisposable
 }
 
 /// <summary>
-/// Used by <see cref="IFileSystem.EnumerateItems"/>.
+/// Used by <see cref="IFileSystem.EnumerateItems(UPath, EnumerationOptions, SearchPredicate?)"/>.
 /// </summary>
 /// <param name="item">The file system item to filer.</param>
 /// <returns><c>true</c> if the item should be kept; otherwise <c>false</c>.</returns>

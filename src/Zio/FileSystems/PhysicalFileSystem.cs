@@ -8,7 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 
 using static Zio.FileSystemExceptionHelper;
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NET5_0_OR_GREATER
 using System.IO.Enumeration;
 #endif
 
@@ -556,7 +556,7 @@ public class PhysicalFileSystem : FileSystem
     // ----------------------------------------------
 
     /// <inheritdoc />
-    protected override IEnumerable<UPath> EnumeratePathsImpl(UPath path, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
+    protected override IEnumerable<UPath> EnumeratePathsImpl(UPath path, string searchPattern, EnumerationOptions enumerationOptions, SearchTarget searchTarget)
     {
         // Special case for Windows as we need to provide list for:
         // - the root folder / (which should just return the /drive folder)
@@ -580,9 +580,9 @@ public class PhysicalFileSystem : FileSystem
                     {
                         yield return PathDrivePrefixOnWindows;
 
-                        if (searchOption == SearchOption.AllDirectories)
+                        if (enumerationOptions.RecurseSubdirectories) // searchOption == SearchOption.AllDirectories
                         {
-                            foreach (var subPath in EnumeratePathsImpl(PathDrivePrefixOnWindows, searchPattern, searchOption, searchTarget))
+                            foreach (var subPath in EnumeratePathsImpl(PathDrivePrefixOnWindows, searchPattern, enumerationOptions, searchTarget))
                             {
                                 yield return subPath;
                             }
@@ -616,11 +616,11 @@ public class PhysicalFileSystem : FileSystem
                         }
                     }
 
-                    if (searchOption == SearchOption.AllDirectories)
+                    if (enumerationOptions.RecurseSubdirectories) // searchOption == SearchOption.AllDirectories
                     {
                         foreach (var pathDrive in pathDrives)
                         {
-                            foreach (var subPath in EnumeratePathsImpl(pathDrive, searchPattern, searchOption, searchTarget))
+                            foreach (var subPath in EnumeratePathsImpl(pathDrive, searchPattern, enumerationOptions, searchTarget))
                             {
                                 yield return subPath;
                             }
@@ -632,19 +632,21 @@ public class PhysicalFileSystem : FileSystem
             }
         }
 
+        var searchOptions = EnumerationOptionsUtils.ToSearchOption(enumerationOptions); 
+        
         IEnumerable<string> results;
         switch (searchTarget)
         {
             case SearchTarget.File:
-                results = Directory.EnumerateFiles(ConvertPathToInternal(path), searchPattern, searchOption);
+                results = Directory.EnumerateFiles(ConvertPathToInternal(path), searchPattern, searchOptions);
                 break;
 
             case SearchTarget.Directory:
-                results = Directory.EnumerateDirectories(ConvertPathToInternal(path), searchPattern, searchOption);
+                results = Directory.EnumerateDirectories(ConvertPathToInternal(path), searchPattern, searchOptions);
                 break;
 
             case SearchTarget.Both:
-                results = Directory.EnumerateFileSystemEntries(ConvertPathToInternal(path), searchPattern, searchOption);
+                results = Directory.EnumerateFileSystemEntries(ConvertPathToInternal(path), searchPattern, searchOptions);
                 break;
             
             default:
@@ -664,7 +666,7 @@ public class PhysicalFileSystem : FileSystem
     }
 
     /// <inheritdoc />
-    protected override IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, SearchOption searchOption, SearchPredicate? searchPredicate)
+    protected override IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, EnumerationOptions enumerationOptions, SearchPredicate? searchPredicate)
     {
         if (IsOnWindows)
         {
@@ -684,9 +686,9 @@ public class PhysicalFileSystem : FileSystem
                         yield return item;
                     }
 
-                    if (searchOption == SearchOption.AllDirectories)
+                    if (enumerationOptions.RecurseSubdirectories) // searchOption == SearchOption.AllDirectories
                     {
-                        foreach (var subItem in EnumerateItemsImpl(PathDrivePrefixOnWindows, searchOption, searchPredicate))
+                        foreach (var subItem in EnumerateItemsImpl(PathDrivePrefixOnWindows, enumerationOptions, searchPredicate))
                         {
                             yield return subItem;
                         }
@@ -717,11 +719,11 @@ public class PhysicalFileSystem : FileSystem
                         }
                     }
 
-                    if (searchOption == SearchOption.AllDirectories)
+                    if (enumerationOptions.RecurseSubdirectories) // searchOption == SearchOption.AllDirectories
                     {
                         foreach (var pathDrive in pathDrives)
                         {
-                            foreach (var subItem in EnumerateItemsImpl(pathDrive, searchOption, searchPredicate))
+                            foreach (var subItem in EnumerateItemsImpl(pathDrive, enumerationOptions, searchPredicate))
                             {
                                 yield return subItem;
                             }
@@ -735,8 +737,8 @@ public class PhysicalFileSystem : FileSystem
         var pathOnDisk = ConvertPathToInternal(path);
         if (!Directory.Exists(pathOnDisk)) yield break;
 
-#if NETSTANDARD2_1
-        var enumerable = new FileSystemEnumerable<FileSystemItem>(pathOnDisk, TransformToFileSystemItem, searchOption == SearchOption.AllDirectories ? CompatibleRecursive : Compatible);
+#if NETSTANDARD2_1 || NET5_0_OR_GREATER
+        var enumerable = new FileSystemEnumerable<FileSystemItem>(pathOnDisk, TransformToFileSystemItem, enumerationOptions);
 
         foreach (var item in enumerable)
         {
@@ -746,8 +748,8 @@ public class PhysicalFileSystem : FileSystem
                 yield return localItem;
             }
         }
-#else
-        var results = Directory.EnumerateFileSystemEntries(pathOnDisk, "*", searchOption);
+#else 
+        var results = Directory.EnumerateFileSystemEntries(pathOnDisk, "*", EnumerationOptionsUtils.ToSearchOption(enumerationOptions));
         foreach (var subPath in results)
         {
             var fileInfo = new FileInfo(subPath);
@@ -771,7 +773,7 @@ public class PhysicalFileSystem : FileSystem
 #endif
     }
 
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NET5_0_OR_GREATER
 
     internal static EnumerationOptions Compatible { get; } = new EnumerationOptions()
     {

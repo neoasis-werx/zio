@@ -607,7 +607,7 @@ public class MountFileSystem : ComposeFileSystem
     }
 
     /// <inheritdoc />
-    protected override IEnumerable<UPath> EnumeratePathsImpl(UPath path, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
+    protected override IEnumerable<UPath> EnumeratePathsImpl(UPath path, string searchPattern, EnumerationOptions enumerationOptions, SearchTarget searchTarget)
     {
         // Use the search pattern to normalize the path/search pattern
         var search = SearchPattern.Parse(ref path, ref searchPattern);
@@ -671,10 +671,10 @@ public class MountFileSystem : ComposeFileSystem
             var locations = GetSearchLocations(pathToVisit);
             
             // Only need to search within one filesystem, no need to sort or do other work
-            if (locations.Count == 1 && locations[0].FileSystem != this && (!first || searchOption == SearchOption.AllDirectories))
+            if (locations.Count == 1 && locations[0].FileSystem != this && (!first || enumerationOptions.RecurseSubdirectories)) // searchOption == SearchOption.AllDirectories
             {
                 var last = locations[0];
-                foreach (var item in last.FileSystem.EnumeratePaths(last.Path, searchPattern, searchOption, searchTarget))
+                foreach (var item in last.FileSystem.EnumeratePaths(last.Path, searchPattern, enumerationOptions, searchTarget))
                 {
                     yield return CombinePrefix(last.Prefix, item);
                 }
@@ -699,7 +699,7 @@ public class MountFileSystem : ComposeFileSystem
                             entries.Add(mountPath);
                         }
 
-                        if (searchOption == SearchOption.AllDirectories)
+                        if (enumerationOptions.RecurseSubdirectories) // searchOption == SearchOption.AllDirectories
                         {
                             sortedDirectories.Add(mountPath);
                         }
@@ -724,7 +724,7 @@ public class MountFileSystem : ComposeFileSystem
                                 entries.Add(publicName);
                             }
 
-                            if (searchOption == SearchOption.AllDirectories && isDirectory)
+                            if (enumerationOptions.RecurseSubdirectories && isDirectory) //searchOption == SearchOption.AllDirectories && isDirectory
                             {
                                 sortedDirectories.Add(publicName);
                             }
@@ -756,7 +756,7 @@ public class MountFileSystem : ComposeFileSystem
     }
 
     /// <inheritdoc/>
-    protected override IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, SearchOption searchOption, SearchPredicate? searchPredicate)
+    protected override IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, EnumerationOptions enumerationOptions, SearchPredicate? searchPredicate)
     {
         // Internal method used to retrieve the list of search locations
         List<SearchLocation> GetSearchLocations(UPath basePath)
@@ -815,11 +815,11 @@ public class MountFileSystem : ComposeFileSystem
 
             var locations = GetSearchLocations(pathToVisit);
 
-            // Only need to search within one filesystem, no need to sort or do other work
-            if (locations.Count == 1 && locations[0].FileSystem != this && (!first || searchOption == SearchOption.AllDirectories))
+            // Only need to search within one filesystem, no need to sort or do other work 
+            if (locations.Count == 1 && locations[0].FileSystem != this && (!first || enumerationOptions.RecurseSubdirectories)) // searchOption == SearchOption.AllDirectories
             {
                 var last = locations[0];
-                foreach (var item in last.FileSystem.EnumerateItems(last.Path, searchOption, searchPredicate))
+                foreach (var item in last.FileSystem.EnumerateItems(last.Path, enumerationOptions, searchPredicate))
                 {
                     var localItem = item;
                     localItem.Path = CombinePrefix(last.Prefix, item.Path);
@@ -852,7 +852,7 @@ public class MountFileSystem : ComposeFileSystem
                             }
                         }
 
-                        if (searchOption == SearchOption.AllDirectories)
+                        if (enumerationOptions.RecurseSubdirectories) // searchOption == SearchOption.AllDirectories
                         {
                             sortedDirectories.Add(mountPath);
                         }
@@ -869,7 +869,7 @@ public class MountFileSystem : ComposeFileSystem
                                 localItem.Path = publicName;
                                 yield return localItem;
 
-                                if (searchOption == SearchOption.AllDirectories && item.IsDirectory)
+                                if (enumerationOptions.RecurseSubdirectories && item.IsDirectory) // searchOption == SearchOption.AllDirectories && isDirectory
                                 {
                                     sortedDirectories.Add(publicName);
                                 }

@@ -3,7 +3,6 @@
 // See the license.txt file in the project root for more information.
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using static Zio.FileSystemExceptionHelper;
 
 namespace Zio.FileSystems;
@@ -37,13 +36,13 @@ public abstract class FileSystem : IFileSystem
     }
 
     /// <summary>
-    /// <c>true</c> if this instance if being disposed.
+    /// <c>true</c> if this instance is being disposed.
     /// </summary>
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     protected bool IsDisposing { get; private set; }
 
     /// <summary>
-    /// <c>true</c> if this instance if being disposed.
+    /// <c>true</c> if this instance is being disposed.
     /// </summary>
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     protected bool IsDisposed { get; private set; }
@@ -52,7 +51,7 @@ public abstract class FileSystem : IFileSystem
     /// Gets or sets a name associated with this filesystem.
     /// </summary>
     /// <remarks>
-    /// This is can be used for debugging purpose or to identify different filesystems of a same kind.
+    /// This can be used for debugging purpose or to identify different filesystems of the same kind.
     /// </remarks>
     public string? Name { get; set; }
 
@@ -81,7 +80,7 @@ public abstract class FileSystem : IFileSystem
     {
         AssertNotDisposed();
 
-        // With FileExists, case where a null path is allowed
+        // With FileExists, the case where a null path is allowed
         if (path.IsNull)
         {
             return false;
@@ -145,7 +144,7 @@ public abstract class FileSystem : IFileSystem
     /// Deletes the specified directory and, if indicated, any subdirectories and files in the directory.
     /// </summary>
     /// <param name="path">The path of the directory to remove.</param>
-    /// <param name="isRecursive"><c>true</c> to remove directories, subdirectories, and files in path; otherwise, <c>false</c>.</param>
+    /// <param name="isRecursive"><c>true</c> to remove directories, subdirectories, and files in the path; otherwise, <c>false</c>.</param>
     protected abstract void DeleteDirectoryImpl(UPath path, bool isRecursive);
 
     internal string DebuggerDisplayInternal()
@@ -253,10 +252,10 @@ public abstract class FileSystem : IFileSystem
     /// Determines whether the specified file exists.
     /// </summary>
     /// <param name="path">The path.</param>
-    /// <returns><c>true</c> if the caller has the required permissions and path contains the name of an existing file;
-    /// otherwise, <c>false</c>. This method also returns false if path is null, an invalid path, or a zero-length string.
+    /// <returns><c>true</c> if the caller has the required permissions and the path contains the name of an existing file;
+    /// otherwise, <c>false</c>. This method also returns false if the path is null, an invalid path, or a zero-length string.
     /// If the caller does not have sufficient permissions to read the specified file,
-    /// no exception is thrown and the method returns false regardless of the existence of path.</returns>
+    /// no exception is thrown and the method returns false regardless of the existence of the path.</returns>
     protected abstract bool FileExistsImpl(UPath path);
 
     /// <inheritdoc />
@@ -368,7 +367,7 @@ public abstract class FileSystem : IFileSystem
     /// Sets the date and time the file was created.
     /// </summary>
     /// <param name="path">The path to a file or directory for which to set the creation date and time.</param>
-    /// <param name="time">A <see cref="DateTime"/> containing the value to set for the creation date and time of path. This value is expressed in local time.</param>
+    /// <param name="time">A <see cref="DateTime"/> containing the value to set for the creation date and time of the path. This value is expressed in local time.</param>
     protected abstract void SetCreationTimeImpl(UPath path, DateTime time);
 
     /// <inheritdoc />
@@ -398,7 +397,7 @@ public abstract class FileSystem : IFileSystem
     /// Sets the date and time the file was last accessed.
     /// </summary>
     /// <param name="path">The path to a file or directory for which to set the last access date and time.</param>
-    /// <param name="time">A <see cref="DateTime"/> containing the value to set for the last access date and time of path. This value is expressed in local time.</param>
+    /// <param name="time">A <see cref="DateTime"/> containing the value to set for the last access date and time of the path. This value is expressed in local time.</param>
     protected abstract void SetLastAccessTimeImpl(UPath path, DateTime time);
 
     /// <inheritdoc />
@@ -410,10 +409,10 @@ public abstract class FileSystem : IFileSystem
 
     /// <summary>
     /// Implementation for <see cref="GetLastWriteTime"/>, <paramref name="path"/> is guaranteed to be absolute and validated through <see cref="ValidatePath"/>.
-    /// Returns the last write date and time of the specified file or directory.
+    /// Returns the last-write date and time of the specified file or directory.
     /// </summary>
     /// <param name="path">The path to a file or directory for which to obtain creation date and time information.</param>
-    /// <returns>A <see cref="DateTime"/> structure set to the last write date and time for the specified file or directory. This value is expressed in local time.</returns>
+    /// <returns>A <see cref="DateTime"/> structure set to the last-write date and time for the specified file or directory. This value is expressed in local time.</returns>
     protected abstract DateTime GetLastWriteTimeImpl(UPath path);
 
     /// <inheritdoc />
@@ -427,8 +426,8 @@ public abstract class FileSystem : IFileSystem
     /// Implementation for <see cref="SetLastWriteTime"/>, <paramref name="path"/> is guaranteed to be absolute and validated through <see cref="ValidatePath"/>.
     /// Sets the date and time that the specified file was last written to.
     /// </summary>
-    /// <param name="path">The path to a file or directory for which to set the last write date and time.</param>
-    /// <param name="time">A <see cref="DateTime"/> containing the value to set for the last write date and time of path. This value is expressed in local time.</param>
+    /// <param name="path">The path to a file or directory for which to set the last-write date and time.</param>
+    /// <param name="time">A <see cref="DateTime"/> containing the value to set for the last-write date and time of the path. This value is expressed in local time.</param>
     protected abstract void SetLastWriteTimeImpl(UPath path, DateTime time);
 
     /// <inheritdoc />
@@ -469,37 +468,54 @@ public abstract class FileSystem : IFileSystem
     {
         AssertNotDisposed();
         if (searchPattern is null) throw new ArgumentNullException(nameof(searchPattern));
-        return EnumeratePathsImpl(ValidatePath(path), searchPattern, searchOption, searchTarget);
+        return EnumeratePathsImpl(ValidatePath(path), searchPattern, EnumerationOptionsUtils.FromSearchOption(searchOption), searchTarget);
     }
 
+    public IEnumerable<UPath> EnumeratePaths(UPath path, string searchPattern, EnumerationOptions enumerationOptions, SearchTarget searchTarget)
+    {
+        AssertNotDisposed();
+        if (searchPattern is null) throw new ArgumentNullException(nameof(searchPattern));
+        return EnumeratePathsImpl(ValidatePath(path), searchPattern, enumerationOptions, searchTarget);
+    }
+    
     /// <summary>
-    /// Implementation for <see cref="EnumeratePaths"/>, <paramref name="path"/> is guaranteed to be absolute and validated through <see cref="ValidatePath"/>.
-    /// Returns an enumerable collection of file names and/or directory names that match a search pattern in a specified path, and optionally searches subdirectories.
+    /// Implementation for <see cref="EnumeratePaths(UPath, string, EnumerationOptions, SearchTarget)"/>, <paramref name="path"/> is guaranteed to be absolute and validated through <see cref="ValidatePath"/>.
+    /// Returns an enumerable collection of file names and/or directory names that match a search pattern in a specified path and optionally searches subdirectories.
     /// </summary>
     /// <param name="path">The path to the directory to search.</param>
-    /// <param name="searchPattern">The search string to match against file-system entries in path. This parameter can contain a combination of valid literal path and wildcard (* and ?) characters (see Remarks), but doesn't support regular expressions.</param>
-    /// <param name="searchOption">One of the enumeration values that specifies whether the search operation should include only the current directory or should include all subdirectories.</param>
+    /// <param name="searchPattern">The search string to match against file-system entries in the path. This parameter can contain a combination of valid literal path and wildcard (* and ?) characters (see Remarks), but doesn't support regular expressions.</param>
+    /// <param name="enumerationOptions">An object that describes the search and enumeration configuration to use.</param>
     /// <param name="searchTarget">The search target either <see cref="SearchTarget.Both"/> or only <see cref="SearchTarget.Directory"/> or <see cref="SearchTarget.File"/>.</param>
     /// <returns>An enumerable collection of file-system paths in the directory specified by path and that match the specified search pattern, option and target.</returns>
-    protected abstract IEnumerable<UPath> EnumeratePathsImpl(UPath path, string searchPattern, SearchOption searchOption, SearchTarget searchTarget);
+    protected abstract IEnumerable<UPath> EnumeratePathsImpl(UPath path, string searchPattern, EnumerationOptions enumerationOptions, SearchTarget searchTarget);
 
 
     /// <inheritdoc />
     public IEnumerable<FileSystemItem> EnumerateItems(UPath path, SearchOption searchOption, SearchPredicate? searchPredicate = null)
     {
         AssertNotDisposed();
-        return EnumerateItemsImpl(ValidatePath(path), searchOption, searchPredicate);
+        return EnumerateItemsImpl(ValidatePath(path), EnumerationOptionsUtils.FromSearchOption(searchOption), searchPredicate);
     }
 
+    public IEnumerable<FileSystemItem> EnumerateItems(UPath path, EnumerationOptions enumerationOptions, SearchPredicate? searchPredicate = null)
+    {
+        AssertNotDisposed();
+        return EnumerateItemsImpl(ValidatePath(path), enumerationOptions, searchPredicate);
+    }
+    
+
+
+
+
     /// <summary>
-    /// Implementation for <see cref="EnumeratePaths"/>, <paramref name="path"/> is guaranteed to be absolute and validated through <see cref="ValidatePath"/>.
+    /// Implementation for <see cref="EnumerateItems(UPath, EnumerationOptions, SearchPredicate?)"/>, <paramref name="path"/> is guaranteed to be absolute and validated through <see cref="ValidatePath"/>.
     /// Returns an enumerable collection of <see cref="FileSystemItem"/> that match a search pattern in a specified path, and optionally searches subdirectories.
     /// </summary>
     /// <param name="path">The path to the directory to search.</param>
-    /// <param name="searchOption">One of the enumeration values that specifies whether the search operation should include only the current directory or should include all subdirectories.</param>
-    /// <param name="searchPredicate">The search string to match against file-system entries in path. This parameter can contain a combination of valid literal path and wildcard (* and ?) characters (see Remarks), but doesn't support regular expressions.</param>
+    /// <param name="enumerationOptions">An object that describes the search and enumeration configuration to use.</param>
+    /// <param name="searchPredicate">The search string to match against file-system entries in the path. This parameter can contain a combination of valid literal path and wildcard (* and ?) characters (see Remarks), but doesn't support regular expressions.</param>
     /// <returns>An enumerable collection of <see cref="FileSystemItem"/> in the directory specified by path and that match the specified search pattern, option and target.</returns>
-    protected abstract IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, SearchOption searchOption, SearchPredicate? searchPredicate);
+    protected abstract IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, EnumerationOptions enumerationOptions, SearchPredicate? searchPredicate);
 
 
     // ----------------------------------------------
@@ -518,7 +534,7 @@ public abstract class FileSystem : IFileSystem
     /// Checks if the file system and <paramref name="path"/> can be watched with <see cref="Watch"/>.
     /// </summary>
     /// <param name="path">The path to check.</param>
-    /// <returns>True if the the path can be watched on this file system.</returns>
+    /// <returns>True if the path can be watched on this file system.</returns>
     protected virtual bool CanWatchImpl(UPath path)
     {
         return true;
@@ -540,7 +556,7 @@ public abstract class FileSystem : IFileSystem
     }
 
     /// <summary>
-    /// Implementation for <see cref="Watch"/>, <paramref name="path"/> is guaranteed to be absolute and valudated through <see cref="ValidatePath"/>.
+    /// Implementation for <see cref="Watch"/>, <paramref name="path"/> is guaranteed to be absolute and validated through <see cref="ValidatePath"/>.
     /// Returns an <see cref="IFileSystemWatcher"/> instance that can be used to watch for changes to files and directories in the given path. The instance must be
     /// configured before events are raised.
     /// </summary>
@@ -593,7 +609,7 @@ public abstract class FileSystem : IFileSystem
 
     /// <summary>
     /// Implementation for <see cref="ResolvePath" />.
-    /// Resolves the specified path to a path in the underlying file system, if one exists. For instance, a <see cref="Zio.FileSystems.SubFileSystem"/> would
+    /// Resolves the specified path to a path in the underlying file system if one exists. For instance, a <see cref="Zio.FileSystems.SubFileSystem"/> would
     /// resolve the path to a qualified path in the underlying file system.
     /// </summary>
     /// <param name="path">The path to resolve.</param>

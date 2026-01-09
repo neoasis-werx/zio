@@ -334,7 +334,7 @@ public class AggregateFileSystem : ReadOnlyFileSystem
     // ----------------------------------------------
 
     /// <inheritdoc />
-    protected override IEnumerable<UPath> EnumeratePathsImpl(UPath path, string searchPattern, SearchOption searchOption, SearchTarget searchTarget)
+    protected override IEnumerable<UPath> EnumeratePathsImpl(UPath path, string searchPattern, EnumerationOptions enumerationOptions, SearchTarget searchTarget)
     {
         SearchPattern.Parse( ref path, ref searchPattern );
 
@@ -356,7 +356,7 @@ public class AggregateFileSystem : ReadOnlyFileSystem
             if (!fileSystem.DirectoryExists( path ))
                 continue;
 
-            foreach (var item in fileSystem.EnumeratePaths( path, searchPattern, searchOption, searchTarget ) )
+            foreach (var item in fileSystem.EnumeratePaths( path, searchPattern, enumerationOptions, searchTarget ) )
             {
                 if (entries.Contains( item )) continue;
                 entries.Add(item);
@@ -372,13 +372,13 @@ public class AggregateFileSystem : ReadOnlyFileSystem
 
 
     /// <inheritdoc />
-    protected override IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, SearchOption searchOption, SearchPredicate? searchPredicate)
+    protected override IEnumerable<FileSystemItem> EnumerateItemsImpl(UPath path, EnumerationOptions enumerationOptions, SearchPredicate? searchPredicate)
     {
         var entries = new HashSet<UPath>();
         for (var i = _fileSystems.Count - 1; i >= 0; i--)
         {
             var fileSystem = _fileSystems[i];
-            foreach (var item in fileSystem.EnumerateItems(path, searchOption, searchPredicate))
+            foreach (var item in fileSystem.EnumerateItems(path, enumerationOptions, searchPredicate))
             {
                 if (entries.Add(item.Path))
                 {
@@ -390,7 +390,7 @@ public class AggregateFileSystem : ReadOnlyFileSystem
         var fallback = Fallback;
         if (fallback != null)
         {
-            foreach (var item in fallback.EnumerateItems(path, searchOption, searchPredicate))
+            foreach (var item in fallback.EnumerateItems(path, enumerationOptions, searchPredicate))
             {
                 if (entries.Add(item.Path))
                 {
